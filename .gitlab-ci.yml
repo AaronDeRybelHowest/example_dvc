@@ -1,0 +1,20 @@
+#.gitlab-ci.yml
+stages: 
+    - cml_run
+    
+cml:
+    tags:
+    - docker
+    stage: cml_run
+    image: dvcorg/cml-py3:latest
+    
+    script:
+        - pip3 install -r requirements.txt
+        - python generate_data.py
+        - python train_small.py
+          
+        - cat metrics.txt >> report.md
+        - cml-publish confusion_matrix.png --md >> report.md
+        - cml-send-comment report.md
+    rules:
+        - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'       
